@@ -5,18 +5,27 @@ import matplotlib.colors as colors
 import numpy as np
 import pandas as pd
 
+time_scale = 2.58
+n_x_ticks = 5
+n_y_ticks = 5
 
 def save_heatmap(data, rowlabels, collabels, title, imgname):
-    plt.matshow(data)
+    #plt.gray()
+    keys = {'cmap':'Greys', 'origin':'lower', 'aspect':'auto'}
+    #plt.matshow(data, cmap='Greys', origin='lower')
+    plt.matshow(data, **keys)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    cax = ax.matshow(data)
+    cax = ax.matshow(data, **keys)
 
     fig.colorbar(cax)
-    #ax.set_xticks(np.arange(data.shape[0]))
+    #ax.set_xticks([int(float(x)) for x in list(data.columns)])
+    #ax.set_xticks(list(map(str, range(0, int(float(data.columns[-1])), 50))))
     #ax.set_yticks(np.arange(data.shape[1]))
+    #ax.set_xticks(np.arange(n_x_ticks))
     ax.tick_params(top=False, bottom=True, labeltop=False, labelbottom=True)
-
+    ax.set_xticklabels([0] + list(map(str, range(0, int(float(data.columns[-1])), int(float(data.columns[-1])/n_x_ticks)))))
+    #ax.set_xticklabels(list(map(int, map(float, data.columns))))
     plt.xlabel(rowlabels)
     plt.ylabel(collabels)
 
@@ -42,5 +51,5 @@ else:
     title = sys.argv[5]
 
     data = pd.read_csv(src)
-
+    #data[0] = data[0] * time_scale
     save_heatmap(data, x_label, y_label, title, dst)

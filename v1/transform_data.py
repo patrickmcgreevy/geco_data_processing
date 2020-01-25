@@ -7,13 +7,15 @@ import math
 import numpy as np
 
 # Default definitions
+pixel_len = 1.52
+time_scalar = 2.58
 num_re = re.compile('([0-9]+)')
 def numeric_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split(num_re, s)]
 
 
 def dist(p1, p2):
-    return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+    return math.sqrt(((p2[0] - p1[0]) * pixel_len)**2 + ((p2[1] - p1[1]) * pixel_len)**2)
 
 
 def in_range(ref_x, ref_y, c_x, c_y, l_bound, u_bound):
@@ -54,7 +56,7 @@ def test_collisions(circles_list):
 #path = input('Please enter the path to your data folder: ')
 #path = '../../raw_data/d'
 if len(sys.argv) < 5:
-    print('Missing arguments.\nPlease include \'srs\' \'dest\' \'x_ref\' \'y_ref\'\nIn that order.')
+    print('Missing arguments.\nPlease include \'src\' \'dest\' \'x_ref\' \'y_ref\'\nIn that order.')
 else:
     #path = '../../raw_data/121319 Force measurements morning.lif_Series012_Crop001'
     path = sys.argv[1]
@@ -87,11 +89,11 @@ else:
         # Time t; average the cells of each circle and insert them into t,radius
         for r in range(r_max):
             #dist_averages = dist_averages.append(pd.DataFrame(np.mean([data[t][x][y] for (x,y) in circles[r]])), ignore_index=True)
-            dist_averages[r][t] = np.mean([data[t][x][y] for (x,y) in circles[r]])
+            dist_averages[r][t] = np.mean([data[t][x][y] for (x,y) in circles[r]], dtype=np.float64)
 
 
     print('Done.')
 
 
     #dist_averages.to_csv('../processed_data')
-    dist_averages.to_csv(dest)
+    dist_averages.transpose().to_csv(dest, header=np.arange(dist_averages.shape[0])*time_scalar, index=False)
