@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 time_scale = 2.58
-n_x_ticks = 5
+n_x_ticks = 4
 n_y_ticks = 5
 
 def save_heatmap(data, rowlabels, collabels, title, imgname):
