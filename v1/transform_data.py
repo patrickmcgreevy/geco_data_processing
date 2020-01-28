@@ -7,7 +7,7 @@ import math
 import numpy as np
 
 # Default definitions
-pixel_len = 1.52
+pixel_len = 1.135
 time_scalar = 2.58
 num_re = re.compile('([0-9]+)')
 def numeric_sort_key(s):
@@ -15,7 +15,7 @@ def numeric_sort_key(s):
 
 
 def dist(p1, p2):
-    return math.sqrt(((p2[0] - p1[0]) * pixel_len)**2 + ((p2[1] - p1[1]) * pixel_len)**2)
+    return math.sqrt( ((p2[0] - p1[0]) * pixel_len)**2 + ((p2[1] - p1[1]) * pixel_len)**2 )
 
 
 def in_range(ref_x, ref_y, c_x, c_y, l_bound, u_bound):

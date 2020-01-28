@@ -5,9 +5,10 @@ import matplotlib.colors as colors
 import numpy as np
 import pandas as pd
 
+d_scale  = 1.135
 time_scale = 2.58
 n_x_ticks = 4
-n_y_ticks = 5
+n_y_ticks = 4
 
 def save_heatmap(data, rowlabels, collabels, title, imgname):
     #plt.gray()
@@ -25,6 +26,7 @@ def save_heatmap(data, rowlabels, collabels, title, imgname):
     #ax.set_xticks(np.arange(n_x_ticks))
     ax.tick_params(top=False, bottom=True, labeltop=False, labelbottom=True)
     ax.set_xticklabels([0] + list(map(str, range(0, int(float(data.columns[-1])), int(float(data.columns[-1])/n_x_ticks)))))
+    ax.set_yticklabels([0] + list(range(0, int(data.shape[1]*d_scale), int(float(data.shape[1]*d_scale/n_y_ticks)))))
     #ax.set_xticklabels(list(map(int, map(float, data.columns))))
     plt.xlabel(rowlabels)
     plt.ylabel(collabels)
