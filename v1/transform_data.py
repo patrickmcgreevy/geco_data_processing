@@ -96,4 +96,5 @@ else:
 
 
     #dist_averages.to_csv('../processed_data')
+    #Columns are times, Rows are distances
     dist_averages.transpose().to_csv(dest, header=np.arange(dist_averages.shape[0])*time_scalar, index=False)
