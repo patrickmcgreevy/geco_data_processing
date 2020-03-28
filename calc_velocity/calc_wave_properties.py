@@ -74,8 +74,8 @@ def get_peak_pair_time_val(critical_points):
     return peaks
 
 
-def get_adjusted_wave_fifty_val(series, n_baseline_frames, max_val):
-    b = series[0:n_baseline_frames].mean()
+
+def get_adjusted_wave_fifty_val(b, max_val):
     return (max_val - b) * 0.5 + b
 
 
@@ -83,25 +83,30 @@ def get_adjusted_wave_fifty_val(series, n_baseline_frames, max_val):
 def get_valley_min_time_val(critical_points, peak_times):
     llm = (None, None)
     for t, v, l in critical_points:
-        if l is cp_labels[0] and peak_times[0][0] < t < peak_times[1][0]:
-           if llm == (None, None) or llm[1] > v:
-               llm = (t, v)
+        try:
+            if l is cp_labels[0] and peak_times[0][0] < t < peak_times[1][0]:
+               if llm == (None, None) or llm[1] > v:
+                   llm = (t, v)
+        except TypeError:
+            print(f'Warn: get_valley_min_time_val() TypeError. Args: {critical_points}, {peak_times}')
+        except:
+            print(f'Warn: get_valley_min_time_val() Uncaught error. Args {critical_points}, {peak_times}')
 
     return llm
 
 # Pass row as series & f is function to determine if we're getting first or second fifty
-def get_fifty_val_t(series, max_val, f):
+def get_fifty_val_t(series, threshold, f):
     val, time = 0, 0
-    adjusted_threshold = get_adjusted_wave_fifty_val(series, n_baseline_frames, max_val)
+    #adjusted_threshold = get_adjusted_wave_fifty_val(series, n_baseline_frames, max_val)
     for key in series.keys():
-        if f(series[key], adjusted_threshold):
+        if f(series[key], threshold):
             return series[key], key
 
     return None, None
 
 
-def get_first_fifty_val_t(series, max_val):
-    v, t = get_fifty_val_t(series, max_val, lambda a, b: a >= b)
+def get_first_fifty_val_t(series, threshold):
+    v, t = get_fifty_val_t(series, threshold, lambda a, b: a >= b)
 
     if v is None and t is None:
         return series[series.keys()[0]], series.keys()[0]
@@ -109,8 +114,8 @@ def get_first_fifty_val_t(series, max_val):
         return v, t
 
 
-def get_second_fifty_val_t(series, max_val):
-    v, t = get_fifty_val_t(series, max_val, lambda a, b: a <= b)
+def get_second_fifty_val_t(series, threshold):
+    v, t = get_fifty_val_t(series, threshold, lambda a, b: a <= b)
 
     if v is None and t is None:
         return series.iloc[-1], series.keys()[-1]
@@ -135,6 +140,10 @@ def first_wave_percentile_approx(data, q):
         else:
             data['wave one reached'][r] = 1
 
+    for r in reversed(range(1, data.shape[0])):
+        if data['wave one reached'][r]:
+            data['wave one reached'][r-1] = 1
+
     return data
 
 
@@ -146,12 +155,22 @@ def second_wave_percentile_approx(data, q):
         else:
             data['wave two reached'][r] = 1
 
+    for r in reversed(range(1, data.shape[0])):
+        if data['wave two reached'][r]:
+            data['wave two reached'][r-1] = 1
+
     return data
 
+
+dist_baseline = 0
 def get_wave_prop_one_wave_dist(dist):
     max_val, max_time = get_max_val_time(dist)
-    first_fifty_val, first_fifty_t = get_first_fifty_val_t(dist[:max_time], max_val)
-    second_fifty_val, second_fifty_t = get_second_fifty_val_t(dist[max_time:], max_val)
+    #threshold = get_adjusted_wave_fifty_val(dist, n_baseline_frames, max_val)
+    global dist_baseline
+    dist_baseline = dist[:n_baseline_frames].mean()
+    t = get_adjusted_wave_fifty_val(dist_baseline, max_val)
+    first_fifty_val, first_fifty_t = get_first_fifty_val_t(dist[:max_time], t)
+    second_fifty_val, second_fifty_t = get_second_fifty_val_t(dist[max_time:], t)
 
     return [max_val, max_time, first_fifty_val, first_fifty_t, second_fifty_val, second_fifty_t, None, None, None, None, None, None, None, None]
 
@@ -163,8 +182,9 @@ def get_wave_prop_one_wave_frame(data):
 
 def get_wave_prop_dist(dist):
     max_val, max_time = get_max_val_time(dist)
-    first_fifty_val, first_fifty_t = get_first_fifty_val_t(dist[:max_time], max_val)
-    second_fifty_val, second_fifty_t = get_second_fifty_val_t(dist[max_time:], max_val)
+    t = get_adjusted_wave_fifty_val(dist_baseline, max_val)
+    first_fifty_val, first_fifty_t = get_first_fifty_val_t(dist[:max_time], t)
+    second_fifty_val, second_fifty_t = get_second_fifty_val_t(dist[max_time:], t)
 
     return[max_val, max_time, first_fifty_val, first_fifty_t, second_fifty_val, second_fifty_t]
 
@@ -173,6 +193,9 @@ def get_wave_prop_two_wave_dist(dist):
     cp = get_critical_points_dist(butterworth_filter_list(dist))
     approx_peaks = get_peak_pair_time_val(cp)
     llm = get_valley_min_time_val(cp, approx_peaks)
+    global dist_baseline
+    dist_baseline = dist[:n_baseline_frames].mean()
+
     #true_peaks = [(get_max_val_time(dist[dist.keys()[0]:llm[0]])), (get_max_val_time(dist[llm[0]:dist.keys()[-1]]))]
 
     return get_wave_prop_dist(dist[:llm[0]]) + [None] + get_wave_prop_dist(dist[llm[0]:]) + [None]

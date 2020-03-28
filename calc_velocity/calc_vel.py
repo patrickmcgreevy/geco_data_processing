@@ -240,7 +240,7 @@ def wave_properties_plot(start, end, step, vel_data, raw_data):
         c = vel_data.iloc[i]
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        ax.plot(filtered_data.columns, raw_data.iloc[i], 'r--', filtered_data.iloc[i], 'b')
+        ax.plot(filtered_data.columns, raw_data.iloc[i], 'yo', filtered_data.iloc[i], 'b--')
         if nwaves is 'two':
             ax.plot(c['wave one first fifty time'], c['wave one first fifty value'], 'go', c['wave two max time'], c['wave two max value'], 'ro', c['wave one max time'], c['wave one max value'], 'go',
                     c['wave two first fifty time'], c['wave two first fifty value'], 'ro', c['wave two second fifty time'], c['wave two second fifty value'], 'ro',
@@ -256,7 +256,7 @@ def wave_properties_plot(start, end, step, vel_data, raw_data):
         ax.set_title('Distance ' + str(i*pixel_len) + ' Raw: ' + str(i))
 
         plt.show()
-        plt.savefig('/home/patrick/Documents/College/2020-Spring/geco/graphics/long_video_two_waves_properties_graphs/e6/dist_'+str(i*pixel_len)+'.png')
+        plt.savefig('/home/patrick/Documents/College/2020-Spring/geco/graphics/test_data_wave_properties_graphs/e5/dist_'+str(i*pixel_len)+'.png')
         plt.close()
 
 
@@ -272,7 +272,7 @@ def critical_points_plot(start, end, step, data):
         cp_y = [y for x,y,z in cp]
         fig = plt.figure()
         ax = fig.add_subplot(111)
-        plt.plot(butterworth_filtered_data_rows.columns, butterworth_filtered_data_rows.iloc[i], 'b', data.iloc[i], 'r',
+        plt.plot(data.iloc[i], 'yo',butterworth_filtered_data_rows.columns, butterworth_filtered_data_rows.iloc[i], 'b',
                  butterworth_filtered_data_rows.columns, spline_4(butterworth_filtered_data_rows.columns), 'g',
                  cp_x, cp_y, 'ro')
 
@@ -305,14 +305,16 @@ def save_heatmap(data, vel_data, rowlabels, collabels, title, imgname):
     ax.grid(which='minor', color='w', linestyle='-', linewidth=3)
     ax.set_title(title, pad=15)
 
-    for i in range(len(vel_data['wave one reached'])):
-        if not vel_data['wave one reached'][i]:
+    for i in reversed(range(len(vel_data['wave one reached']))):
+        if vel_data['wave one reached'][i]:
             plt.plot([i for x in range(data.shape[1])], 'b--')
+            break
 
     if nwaves is 'two':
-        for i in range(len(vel_data['wave two reached'])):
-            if not  vel_data['wave two reached'][i]:
+        for i in reversed(range(len(vel_data['wave two reached']))):
+            if vel_data['wave two reached'][i]:
                 plt.plot([i for x in range(data.shape[1])], 'g--')
+                break
 
     plt.tight_layout()
     plt.savefig(imgname)
@@ -328,7 +330,8 @@ else:
     data = pd.read_csv(src)
     data = pd.DataFrame(data, columns=list(map(float, data.columns)))
 
-    if nwaves is 'one':
+    print(f'\'{nwaves}\' == \'one\' {nwaves == "one"}')
+    if nwaves == 'one':
         print('Computing properties for one wave. Analysis underway...')
         vel_data = get_wave_prop_one_wave_frame(data)
     else:
