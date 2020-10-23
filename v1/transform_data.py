@@ -74,7 +74,7 @@ else:
     ref_x, ref_y = (int(sys.argv[3]), int(sys.argv[4]))
     #adj_dest = sys.argv[5]
     if len(sys.argv) > 5:
-        pixel_len = sys.argv[5]
+        pixel_len = float(sys.argv[5])
     print('(x_ref, y_ref): (', ref_x, ',', ref_y, ')\n', sep=' ')
     #print(f'adj_dest: {adj_dest}')
     print(f'pixel_len: {pixel_len}')
