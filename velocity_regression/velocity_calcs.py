@@ -11,7 +11,7 @@ np.random.seed(42)
 # takes one series, time(s) sorted by distance(pixels) and returns a series of speed. Sorted by distance
 # Last value is undefined, so we just make it the same as the previous velocity.
 # This keeps all the columns the same length
-def calc_vel(time, pixel_len=1.135):
+def calc_vel(time, pixel_len=pixel_len):
     r = [pixel_len/(time[i+1]-time[i]) for i in range(len(time)-1)]
     r.append(r[-1])
     return r
