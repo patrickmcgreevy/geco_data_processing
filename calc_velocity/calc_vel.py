@@ -322,11 +322,14 @@ def save_heatmap(data, vel_data, rowlabels, collabels, title, imgname):
 
 if len(sys.argv) < 4:
     print('Too few arguments. Include \'source\', \'destination\', and \'one\' or \'two\', in that order.')
+    print('The optional argument(s) [pixel_len] should be appended to the arguments.')
 else:
     src = sys.argv[1]
     dest = sys.argv[2]
     print(f'src: {src}\ndest: {dest}\n')
     nwaves = sys.argv[3]
+    if len(sys.argv) > 4:
+        pixel_len = sys.argv[4]
     data = pd.read_csv(src)
     data = pd.DataFrame(data, columns=list(map(float, data.columns)))
 

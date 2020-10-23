@@ -45,13 +45,16 @@ def save_heatmap(data, rowlabels, collabels, title, imgname):
 if (len(sys.argv) < 6):
     print('Error: Too few arguments')
     print('Please include \'src\' \'dest\' \'X-Axis Label\' \'Y-Axis Label\' \'Graph Title\'', 'in that order.')
-    print('Labels and titles with spaces in them must be surounded by \'NAME\' single quotes.')
+    print('Optional argument(s) [pixel_len] should be appended to the arguments.')
+    print('Labels and titles with spaces in them must be surrounded by \'NAME\' single quotes.')
 else:
     src = sys.argv[1]
     dst = sys.argv[2]
     x_label = sys.argv[3]
     y_label = sys.argv[4]
     title = sys.argv[5]
+    if len(sys.argv) > 6:
+        d_scale = sys.argv[6]
 
     data = pd.read_csv(src)
     #data[0] = data[0] * time_scale

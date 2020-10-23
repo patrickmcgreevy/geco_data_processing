@@ -52,11 +52,16 @@ def test_collisions(circles_list):
             if d[p] > 1:
                 print('Collision at', p, sep=' ')
 
+# Adjust the row by cellwise subtracting the mean of the first 25 cells. This is meant to eliminate striping in the
+# data
+def adjust_row(series):
+    return (series - series[0:25].mean()).map(lambda x: (x, 0)[x <= 0])
 
 #path = input('Please enter the path to your data folder: ')
 #path = '../../raw_data/d'
-if len(sys.argv) < 5:
-    print('Missing arguments.\nPlease include \'src\' \'dest\' \'x_ref\' \'y_ref\'\nIn that order.')
+if len(sys.argv) < 6:
+    print('Missing arguments.\nPlease include \'src\' \'dest\' \'x_ref\' \'y_ref\' \'adj_dest\'\nIn that order.')
+    print('The optional argument(s) [pixel_len] should be appended to the arguments list.')
 else:
     #path = '../../raw_data/121319 Force measurements morning.lif_Series012_Crop001'
     path = sys.argv[1]
@@ -67,8 +72,12 @@ else:
     #x, y = tuple(x_y.split(','))
     #ref_x, ref_y = (217, 264)
     ref_x, ref_y = (int(sys.argv[3]), int(sys.argv[4]))
+    adj_dest = sys.argv[5]
+    if len(sys.argv) > 6:
+        pixel_len = sys.argv[6]
     print('(x_ref, y_ref): (', ref_x, ',', ref_y, ')\n', sep=' ')
-
+    print(f'adj_dest: {adj_dest}')
+    print(f'pixel_len: {pixel_len}')
     print('Loading all movie data...')
     files = glob.glob(os.path.join(path, "*.txt"))
     files.sort(key=numeric_sort_key)
@@ -98,3 +107,7 @@ else:
     #dist_averages.to_csv('../processed_data')
     #Columns are times, Rows are distances
     dist_averages.transpose().to_csv(dest, header=np.arange(dist_averages.shape[0])*time_scalar, index=False)
+    adj_dist_averages = dist_averages.transpose()
+    adj_dist_averages = adj_dist_averages.apply(adjust_row, axis=1, result_type='broadcast')
+    adj_dist_averages.to_csv(adj_dest, header=np.arange(adj_dist_averages.shape[1])*time_scalar, index=False)
+
